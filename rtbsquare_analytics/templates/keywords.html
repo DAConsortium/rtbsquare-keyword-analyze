@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+    <header>
+        <div id="back"><a href="/">記事一覧へ</a></div>
+        <h2>「{{ article['title'] }}」</h2>
+        <p><a href="{{ article['url'] }}">{{ article['url'] }}</a></p>
+        <p>タグ： 
+            {% for tag in article['tags'] %}
+                <span class="tag">{{ tag }}</span>
+            {% endfor %}
+        </p>
+        <button type="button" class="btn btn-primary article-content">記事本文</button>
+        <div id="article-content" style="display: none">
+            <p>{{ article['content'] }}</p>
+        </div>
+        <script type="text/javascript">
+            $(function(){
+                $('button.article-content').click(function(){
+                    $('div#article-content').slideToggle();
+                })
+            });
+        </script>
+    </header>
+    
+    <div class="keywords">
+        <table id="datatable" class="table table-striped container">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">キーワード</th>
+                    <th scope="col">タイプ</th>
+                    <th scope="col">重要度</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entity in article['entities'] %}
+                    <tr>
+                        <td>{{ entity['entity'] }}</td>
+                        <td>{{ entity['type'] }}</td>
+                        <td>{{ entity['salience'] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="footer">
+        <div class="paging"></div>
+    </div>
+</div>
+
+<script defer>
+    $('#datatable').datatable({
+        pageSize: 20,
+        sort: [false, false, true],
+        filters: [true, 'select', false],
+        filterText: 'search'
+    });
+</script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/keywords.css') }}" type="text/css" />
+{% endblock %}

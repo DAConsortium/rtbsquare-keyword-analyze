@@ -1,0 +1,70 @@
+def analysisArticles(start_date, end_date):
+    from google.auth import app_engine
+    from google.cloud import language_v1
+    from google.cloud.language_v1 import enums, types
+    from google.protobuf.json_format import MessageToJson
+    import json
+    import os
+    import datetime
+    import sqlalchemy
+    from sqlalchemy.sql import text
+    from sqlalchemy.orm.session import sessionmaker
+    import pg8000
+
+    print("----- Analysis articles term: {} ~ {} -----".format(start_date, end_date))
+    client = language_v1.LanguageServiceClient()
+    ENGINE = sqlalchemy.create_engine(
+        sqlalchemy.engine.url.URL(
+            drivername='postgres+pg8000',
+            username=os.getenv('DB_USER', ''),
+            password=os.getenv('DB_PASSWORD', ''),
+            database=os.getenv('DB_NAME', ''),
+            query={
+                'unix_sock': '/cloudsql/{}/.s.PGSQL.5432'.format(os.getenv('CONNECTION_NAME', ''))
+            }
+        )
+    )
+
+    SESSION = sessionmaker()
+    session = SESSION(bind=ENGINE, autocommit=True)
+    with session.connection() as conn:
+        TIMEOUT = 60.0*30.0 # timeout value in second
+
+        with conn.begin():
+            results = conn.execute("SELECT * FROM articles WHERE date > '{}' AND date <= '{}';".format(start_date, end_date))
+        article_id = None
+        document = None
+        response = None
+        entities = None
+
+        while True:
+            article = results.fetchone()
+            if article is None:
+                break
+            
+            print("Analtics {} : {} {} ".format(article['id'], article['url'], article['date']))
+            article_id = article['id']
+            with conn.begin():
+                entities_results = conn.execute("SELECT * FROM entities where articleid = {};".format(article_id))
+                if entities_results.fetchone() is not None:
+                    print("Entities already exits in entities table. ")
+                    break
+            
+            document = types.Document(
+                content = article['content'],
+                type = enums.Document.Type.PLAIN_TEXT)
+            response = client.analyze_entities(document=document, encoding_type="UTF8", timeout=TIMEOUT)
+            response = json.loads(MessageToJson(response))
+            entities = response["entities"]
+            
+            d = None
+            for entity in entities:
+                if("salience" not in entity.keys()):
+                    entity['salience'] = None
+                d = {"article_id": article_id, "name": entity['name'], "type": entity['type'], "salience": entity['salience']}
+                with conn.begin():
+                    conn.execute(
+                        text("INSERT INTO entities (articleId, entity, type, salience) VALUES (:article_id, :name, :type, :salience);"), d
+                    )
+            
+    session.close()

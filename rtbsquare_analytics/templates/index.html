@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+    <header>
+        <h2>記事一覧</h2>
+    </header>
+    <div class="downloads">
+        <p>CSVダウンロードする項目を選択</p>
+        <form action="/dump" method="post">
+            <div id="check">
+                <label>
+                    <input type="checkbox" checked="checked" name="タイトル" value="articles.title">&nbsp;&nbsp;タイトル
+                </label>
+                <label>
+                    <input type="checkbox" checked="checked" name="URL" value="articles.url">&nbsp;&nbsp;URL
+                </label>
+                <label>
+                    <input type="checkbox" checked="checked" name="投稿日" value="articles.date">&nbsp;&nbsp;投稿日
+                </label>
+                <label>
+                    <input type="checkbox" checked="checked" name="キーワード" value="entities.entity">&nbsp;&nbsp;キーワード
+                </label>
+                <label>
+                    <input type="checkbox" checked="checked" name="タイプ" value="entities.type">&nbsp;&nbsp;タイプ
+                </label>
+                <label>
+                    <input type="checkbox" checked="checked" name="重要度" value="entities.salience">&nbsp;&nbsp;重要度
+                </label>
+            </div>
+            <div id="term">
+                <script type="text/javascript" src="{{ url_for('static', filename='js/index.js') }}" defer></script>
+                <p>期間</p>
+                <input class="start-date" type="date" name="start-date" value="2019-01-01" min="2000-01-01">&nbsp;〜&nbsp;
+                <input class="end-date" type="date" name="end-date" value="2019-12-31" min="2000-01-02">
+            </div>
+            <button class="btn btn-secondary" type="submit">ダウンロード</button>
+        </form>
+    </div>
+    <div class="articles">
+        <table id="datatable" class="table table-striped container">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">タイトル</th>
+                    <th scope="col" style="width:10%">投稿日</th>
+                    <th scope="col">URL</th>
+                    <th scope="col" style="width: 20%">タグ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for article in articles%}
+                <tr>
+                    <th scope="row"><a href="/keywords?article={{ article['id'] }}">詳細</a></th>
+                    <td>{{ article['title'] }}</td>
+                    <td style="width:10%">{{ article['date'] }}</td>
+                    <td><a href="{{ article['url'] }}">{{ article['url'] }}</a></td>
+                    <td style="width: 20%">
+                        {% for tag in article['tags'] %}
+                        <p>{{ tag }}</p>
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="footer">
+        <div class="paging"></div>
+    </div>
+</div>
+<script defer>
+    $('#datatable').datatable({
+        pageSize: 20,
+        sort: [false, true, true, true, false],
+        filters: [false, true, true, true, true],
+        filterText: 'search'
+    });
+</script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" type="text/css" />
+{% endblock %}

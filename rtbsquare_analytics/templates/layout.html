@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{ title }}</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='datatable-master/css/datatable.css') }}" type="text/css" />
+        <script src="{{ url_for('static', filename='datatable-master/js/datatable.min.js') }}" type="text/javascript"></script>        
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" type="text/javascript"></script>
+        <script src="{{ url_for('static', filename='datatable-master/js/datatable.jquery.min.js') }}" type="text/javascript"></script>        
+    </head>
+    <body>
+        <div style="margin: 10px; text-align: right;">
+            {% if current_user.is_authenticated %}
+                <a href="/logout">ログアウト</a>
+            {% endif %}
+        </div>
+        {% block content %}
+        {% endblock %}
+    </body>
+</html>

@@ -1,0 +1,49 @@
+
+div#back{
+    padding: 3px;
+    display: inline-block;
+    margin-top:30px;
+    border: 2px solid gray;
+}
+
+header h2{
+    margin: 20px;
+}
+
+button.article-content{
+    margin: 10px;
+}
+
+div#article-content{
+    border: 3px solid gray;
+    padding: 10px;
+}
+
+header .tag{
+    margin: 10px;
+}
+
+div.footer{
+    text-align: center;
+}
+
+div.paging{
+    display: inline-block;
+}
+
+ul.pagination {
+    font-size: 20px;
+    text-align: center;
+}
+
+ul.pagination li {
+    margin: 5px;
+    padding: 2px;
+    border: 1px solid gray;
+    display: inline-block;
+}
+
+ul.pagination li.active,
+ul.pagination li:hover{
+    background: #aaa;
+}
