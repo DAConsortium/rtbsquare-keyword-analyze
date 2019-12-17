@@ -50,4 +50,4 @@ You can generate some random key as below
 ```
 
 ## LICENCE
-Reference [LICENCE.txt](LICENCE.txt)
+Reference [LICENCE.txt](LICENSE.txt)
