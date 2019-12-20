@@ -13,17 +13,17 @@ def analysisArticles(start_date, end_date):
 
     print("----- Analysis articles term: {} ~ {} -----".format(start_date, end_date))
     client = language_v1.LanguageServiceClient()
-    ENGINE = sqlalchemy.create_engine(
-        sqlalchemy.engine.url.URL(
-            drivername='postgres+pg8000',
-            username=os.getenv('DB_USER', ''),
-            password=os.getenv('DB_PASSWORD', ''),
-            database=os.getenv('DB_NAME', ''),
-            query={
-                'unix_sock': '/cloudsql/{}/.s.PGSQL.5432'.format(os.getenv('CONNECTION_NAME', ''))
-            }
-        )
-    )
+    dbURL = sqlalchemy.engine.url.URL(
+                drivername='postgres+pg8000',
+                username=os.getenv('DB_USER', ''),
+                password=os.getenv('DB_PASSWORD', ''),
+                database=os.getenv('DB_NAME', '')
+            )
+
+    if(os.getenv('CONNECTION_NAME') is not None):
+        dbURL.query = {'unix_sock': '/cloudsql/{}/.s.PGSQL.5432'.format(os.getenv('CONNECTION_NAME'))}
+
+    ENGINE = sqlalchemy.create_engine(dbURL)
 
     SESSION = sessionmaker()
     session = SESSION(bind=ENGINE, autocommit=True)
