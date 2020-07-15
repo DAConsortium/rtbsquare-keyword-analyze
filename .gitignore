@@ -1,0 +1,15 @@
+.vscode/*
+.vscode/
+env/*
+env/
+.DS_Store
+.python-version
+cloud_sql_proxy
+**/.python-version/**
+**/__pycache__/*
+
+**/*.sh
+
+main.py
+dac-techdev0-bcaadd06c045.json
+*.yaml
