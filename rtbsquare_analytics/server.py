@@ -173,22 +173,26 @@ def dump():
         return res
 
 def dailyJob():
+    import datetime
     session = getSession()
     with session.connection() as conn:
         results = conn.execute('SELECT date FROM articles ORDER BY date DESC LIMIT 1;')
         record = results.fetchone()
     session.close()
+
+    MAX_PAGE_NUM = 5
     if record is not None:
         latest = record['date']
         print("Latest article date in DATABASE: {} .".format(latest))
         try:
-            import datetime
-            from articleCrawl.languageAnalytics.analytics import analysisArticles
             end_date = datetime.date.today()
             cmd = "scrapy crawl articles -a start_date={} -a end_date={} -a crawl_start_pagenum={} -a crawl_end_pagenum={} --nolog".format(
-                latest.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'), 1, 5
+                latest.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'), 1, MAX_PAGE_NUM
             )
             subprocess.check_call(cmd.split())
+            import sys
+            sys.path.append('../')
+            from articleCrawl.languageAnalytics.analytics import analysisArticles
             analysisArticles(latest.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
             print("----- Finish dailyJob -----")
         except:

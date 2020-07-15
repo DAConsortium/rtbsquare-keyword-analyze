@@ -1,0 +1,21 @@
+.gcloudignore
+.gitignore
+**/*.sh
+cloud_sql_proxy
+
+# files for virtualenv
+/env/*
+/env
+
+# files for docker
+**/Dockerfile
+
+# python management files
+**/.python-version
+**/__pycache__/*
+**/__pycache__/
+
+**/.DS_Store
+
+LICENSE.txt
+README.md

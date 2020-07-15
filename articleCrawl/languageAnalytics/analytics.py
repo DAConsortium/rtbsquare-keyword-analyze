@@ -42,7 +42,7 @@ def analysisArticles(start_date, end_date):
             if article is None:
                 break
             
-            print("Analtics {} : {} {} ".format(article['id'], article['url'], article['date']))
+            print("Analytics {} : {} {} ".format(article['id'], article['url'], article['date']))
             article_id = article['id']
             with conn.begin():
                 entities_results = conn.execute("SELECT * FROM entities where articleid = {};".format(article_id))
