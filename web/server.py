@@ -14,7 +14,7 @@ app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_APP_KEY', '')
 
 from flask_login import LoginManager, login_user, logout_user, login_required
-from rtbsquare_analytics.auth.users import User
+from web.auth.users import User
 
 login_manager = LoginManager()
 login_manager.init_app(app)
