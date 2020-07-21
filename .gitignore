@@ -2,6 +2,7 @@
 .vscode/
 env/*
 env/
+/log/*
 .DS_Store
 .python-version
 cloud_sql_proxy
@@ -12,4 +13,5 @@ cloud_sql_proxy
 
 main.py
 dac-techdev0-bcaadd06c045.json
+*.json
 *.yaml
