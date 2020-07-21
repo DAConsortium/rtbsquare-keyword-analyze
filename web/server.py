@@ -78,7 +78,7 @@ def index():
         # タグ紐付け
         tags = []
         for article in articles:
-            results = conn.execute("SELECT tag FROM article_tags WHERE articleId = %s;", (article['id'], ))
+            results = conn.execute("SELECT tag FROM article_tags WHERE article_url = %s;", (article['url'], ))
             records = results.fetchall()
             tags = list(map(lambda row: row[0], records))
             article['tags'] = tags
@@ -90,33 +90,31 @@ def index():
 @app.route('/keywords')
 @login_required
 def keywords():
-    articleId = request.args.get('article')
-    if(articleId is None):
+    articleUrl = request.args.get('article')
+    if(articleUrl is None):
         return "Error: Bad request parameters."
-    else:
-        articleId = int(articleId)
 
     session = getSession()
     with session.connection() as conn:
-        results = conn.execute("SELECT * FROM articles WHERE id = %s;", (articleId, ))
+        results = conn.execute("SELECT * FROM articles WHERE url = %s;", (articleUrl, ))
         record = results.fetchone()
         if(record is None):
-            return "Error: articleId {} does not exists.".format(articleId)
+            return "Error: articleUrl {} does not exists.".format(articleUrl)
         article = dict(record)
 
-        results = conn.execute("SELECT tag FROM article_tags WHERE articleid = %s;", (articleId, ))
+        results = conn.execute("SELECT tag FROM article_tags WHERE article_url = %s;", (articleUrl, ))
         records = results.fetchall()
         records = list(map(lambda row: dict(zip(results.keys(), row)), records))
         
         if(len(records) == 0):
-            return "Error: tags are not found ... articleId = {}".format(articleId)
+            return "Error: tags are not found ... articleUrl = {}".format(articleUrl)
         tags = list(map(lambda row: row['tag'], records))
         article['tags'] = tags
-        results = conn.execute("SELECT * FROM entities WHERE articleid = %s;", (articleId, ))
+        results = conn.execute("SELECT * FROM entities WHERE article_url = %s;", (articleUrl, ))
         records = results.fetchall()
         records = list(map(lambda row: dict(zip(results.keys(), row)), records))
         if(len(records) == 0):
-            return "Error: entities are not found ... articleId = {}".format(articleId)
+            return "Error: entities are not found ... articleUrl = {}".format(articleUrl)
         entities = []
         for row in records:
             if(row['salience'] is None):
@@ -152,7 +150,7 @@ def dump():
         session = getSession()
         with session.connection() as conn:
             results = conn.execute(
-                "SELECT {} FROM articles INNER JOIN entities ON articles.id = entities.articleid WHERE articles.date >= '{}' AND articles.date <= '{}';"
+                "SELECT {} FROM articles INNER JOIN entities ON articles.url = entities.article_url WHERE articles.date >= '{}' AND articles.date <= '{}';"
                 .format(sel_str, start_date, end_date)
                 )
             records = results.fetchall()
