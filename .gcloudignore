@@ -1,5 +1,7 @@
 .gcloudignore
 .gitignore
+.vscode/*
+.vscode/
 **/*.sh
 cloud_sql_proxy
 
