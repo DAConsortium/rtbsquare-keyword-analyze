@@ -11,7 +11,6 @@ def analysisArticles(start_date, end_date):
     from sqlalchemy.orm.session import sessionmaker
     import pg8000
 
-    print("----- Analysis articles term: {} ~ {} -----".format(start_date, end_date))
     client = language_v1.LanguageServiceClient()
     dbURL = sqlalchemy.engine.url.URL(
                 drivername='postgres+pg8000',
@@ -32,7 +31,7 @@ def analysisArticles(start_date, end_date):
 
         with conn.begin():
             results = conn.execute("SELECT * FROM articles WHERE date > '{}' AND date <= '{}';".format(start_date, end_date))
-        article_id = None
+        article_url = None
         document = None
         response = None
         entities = None
@@ -42,10 +41,10 @@ def analysisArticles(start_date, end_date):
             if article is None:
                 break
             
-            print("Analytics {} : {} {} ".format(article['id'], article['url'], article['date']))
-            article_id = article['id']
+            print("Analytics: {} [{}] ".format(article['url'], article['date']))
+            article_url = article['url']
             with conn.begin():
-                entities_results = conn.execute("SELECT * FROM entities where articleid = {};".format(article_id))
+                entities_results = conn.execute("SELECT * FROM entities where article_url = '{}';".format(article_url))
                 if entities_results.fetchone() is not None:
                     print("Entities already exits in entities table. ")
                     break
@@ -61,10 +60,10 @@ def analysisArticles(start_date, end_date):
             for entity in entities:
                 if("salience" not in entity.keys()):
                     entity['salience'] = None
-                d = {"article_id": article_id, "name": entity['name'], "type": entity['type'], "salience": entity['salience']}
+                d = {"article_url": article_url, "name": entity['name'], "type": entity['type'], "salience": entity['salience']}
                 with conn.begin():
                     conn.execute(
-                        text("INSERT INTO entities (articleId, entity, type, salience) VALUES (:article_id, :name, :type, :salience);"), d
+                        text("INSERT INTO entities (article_url, entity, type, salience) VALUES (:article_url, :name, :type, :salience);"), d
                     )
             
     session.close()

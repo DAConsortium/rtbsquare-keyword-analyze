@@ -12,7 +12,7 @@ class ArticleSpider(scrapy.Spider):
         self.end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d").date()
         self.crawl_start_pagenum = int(crawl_start_pagenum)
         self.crawl_end_pagenum = int(crawl_end_pagenum)
-        print("----- Crawling term : {} ~ {} -----".format(self.start_date, self.end_date))
+        print("----- Crawling term : [ {} < ] AND [ <= {} ] -----".format(self.start_date, self.end_date))
     
     def start_requests(self):
         if self.start_date != self.end_date:

@@ -48,18 +48,17 @@ class ArticlecrawlPipeline(object):
                         text("INSERT INTO articles (url, date, title, content) VALUES(:url, to_date(:date, 'YYYY/MM/DD'), :title, :content);"),
                         item
                     )
-                    results = self.conn.execute("SELECT last_value from articles_id_seq;")
-                last_id = results.fetchone()['last_value']
+                
                 d = None
                 for tag in item['tags']:
-                    d = {"lastid": last_id, "tag": tag}
+                    d = {"url": item['url'], "tag": tag}
                     with self.conn.begin():
                         self.conn.execute(
-                            text("INSERT INTO article_tags (articleId, tag) VALUES(:lastid, :tag);"), d
+                            text("INSERT INTO article_tags (article_url, tag) VALUES(:url, :tag);"), d
                         )
-                print("[INFO] new item {} ".format(item)) # for log of GAE
+                print("[INFO] New item {} ".format(item))
             else:
-                print("[WARNING] item already exists: {}".format(item))
+                print("[INFO] Item already exists in Database. : {}".format(item))
             return item
         except Exception as e:
             print("Error in pipeline.")

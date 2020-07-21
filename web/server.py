@@ -14,7 +14,7 @@ app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_APP_KEY', '')
 
 from flask_login import LoginManager, login_user, logout_user, login_required
-from rtbsquare_analytics.auth.users import User
+from web.auth.users import User
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -78,7 +78,7 @@ def index():
         # タグ紐付け
         tags = []
         for article in articles:
-            results = conn.execute("SELECT tag FROM article_tags WHERE articleId = %s;", (article['id'], ))
+            results = conn.execute("SELECT tag FROM article_tags WHERE article_url = %s;", (article['url'], ))
             records = results.fetchall()
             tags = list(map(lambda row: row[0], records))
             article['tags'] = tags
@@ -90,33 +90,31 @@ def index():
 @app.route('/keywords')
 @login_required
 def keywords():
-    articleId = request.args.get('article')
-    if(articleId is None):
+    articleUrl = request.args.get('article')
+    if(articleUrl is None):
         return "Error: Bad request parameters."
-    else:
-        articleId = int(articleId)
 
     session = getSession()
     with session.connection() as conn:
-        results = conn.execute("SELECT * FROM articles WHERE id = %s;", (articleId, ))
+        results = conn.execute("SELECT * FROM articles WHERE url = %s;", (articleUrl, ))
         record = results.fetchone()
         if(record is None):
-            return "Error: articleId {} does not exists.".format(articleId)
+            return "Error: articleUrl {} does not exists.".format(articleUrl)
         article = dict(record)
 
-        results = conn.execute("SELECT tag FROM article_tags WHERE articleid = %s;", (articleId, ))
+        results = conn.execute("SELECT tag FROM article_tags WHERE article_url = %s;", (articleUrl, ))
         records = results.fetchall()
         records = list(map(lambda row: dict(zip(results.keys(), row)), records))
         
         if(len(records) == 0):
-            return "Error: tags are not found ... articleId = {}".format(articleId)
+            return "Error: tags are not found ... articleUrl = {}".format(articleUrl)
         tags = list(map(lambda row: row['tag'], records))
         article['tags'] = tags
-        results = conn.execute("SELECT * FROM entities WHERE articleid = %s;", (articleId, ))
+        results = conn.execute("SELECT * FROM entities WHERE article_url = %s;", (articleUrl, ))
         records = results.fetchall()
         records = list(map(lambda row: dict(zip(results.keys(), row)), records))
         if(len(records) == 0):
-            return "Error: entities are not found ... articleId = {}".format(articleId)
+            return "Error: entities are not found ... articleUrl = {}".format(articleUrl)
         entities = []
         for row in records:
             if(row['salience'] is None):
@@ -152,7 +150,7 @@ def dump():
         session = getSession()
         with session.connection() as conn:
             results = conn.execute(
-                "SELECT {} FROM articles INNER JOIN entities ON articles.id = entities.articleid WHERE articles.date >= '{}' AND articles.date <= '{}';"
+                "SELECT {} FROM articles INNER JOIN entities ON articles.url = entities.article_url WHERE articles.date >= '{}' AND articles.date <= '{}';"
                 .format(sel_str, start_date, end_date)
                 )
             records = results.fetchall()
@@ -172,38 +170,45 @@ def dump():
         session.close()
         return res
 
-def dailyJob():
+#   max_page_num: max page number of rtbsquare
+#   save_term: term of data which shoud saved in database. 
+#   first_crawl_term: max first crawl term (use when database is empty)
+def dailyJob(max_page_num, save_term, first_crawl_term):
     import datetime
+    today = datetime.date.today()
+
     session = getSession()
     with session.connection() as conn:
+        conn.execute("DELETE FROM articles where date < '{}';".format(today - datetime.timedelta(days=save_term)))
         results = conn.execute('SELECT date FROM articles ORDER BY date DESC LIMIT 1;')
         record = results.fetchone()
     session.close()
 
-    MAX_PAGE_NUM = 5
+    latest = None
     if record is not None:
         latest = record['date']
-        print("Latest article date in DATABASE: {} .".format(latest))
-        try:
-            end_date = datetime.date.today()
-            cmd = "scrapy crawl articles -a start_date={} -a end_date={} -a crawl_start_pagenum={} -a crawl_end_pagenum={} --nolog".format(
-                latest.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'), 1, MAX_PAGE_NUM
-            )
-            subprocess.check_call(cmd.split())
-            import sys
-            sys.path.append('../')
-            from articleCrawl.languageAnalytics.analytics import analysisArticles
-            analysisArticles(latest.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
-            print("----- Finish dailyJob -----")
-        except:
-            print("Error in subprocess")
+        print("[INFO] Latest article date in DATABASE: {} .".format(latest))
     else:
-        print("Error: Table articles is empty.")
+        latest = today - datetime.timedelta(days=first_crawl_term)
+        print("[WORNING] Table articles is empty. Start to Crawl before {} days from today. ".format(first_crawl_term))
+    try:
+        cmd = "scrapy crawl articles -a start_date={} -a end_date={} -a crawl_start_pagenum={} -a crawl_end_pagenum={} --nolog".format(
+            latest.strftime('%Y-%m-%d'), today.strftime('%Y-%m-%d'), 1, max_page_num
+        )
+        subprocess.check_call(cmd.split())
+        import sys
+        sys.path.append('../')
+        from articleCrawl.languageAnalytics.analytics import analysisArticles
+        analysisArticles(latest.strftime('%Y-%m-%d'), today.strftime('%Y-%m-%d'))
+        print("----- Finish dailyJob -----")
+    except:
+        print("Error in subprocess")
+
     
 @app.route('/crawl', methods=["GET"])
 def cronCrawl():
     if request.headers.get('X-Appengine-Cron') is not None:
-        p = multiprocessing.Process(target=dailyJob)
+        p = multiprocessing.Process(target=dailyJob(5, 180, 30)) # set crawl max page & save term & first crawling date
         p.start()
         return "success"
     else:

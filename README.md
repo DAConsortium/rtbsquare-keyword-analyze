@@ -13,7 +13,7 @@ Scrapy == 1.7.4
 google-cloud-language == 1.3.0
 google-api-python-client == 1.7.11
 google-auth-httplib2 == 0.0.3
-google-auth == 1.6.3
+google-auth == 1.18.0
 
 gunicorn == 20.0.0
 sqlalchemy == 1.3.7
@@ -27,9 +27,9 @@ google-cloud-language == 1.3.0
 - postgresql
 - python3.7.3
 
-## Usage
+## Usage(Development in Local Enviroments)
 
-1. Set environment variables below
+### 1. Set environment variables below
 ```
 export DB_NAME = ***
 export DB_USER = ***
@@ -48,6 +48,63 @@ You can generate some random key as below
 >>> os.urandom(24)
 '\xfd{H\xe5<\x95\xf9\xe3\……………xa2\xa0\x9fR"\xa1\xa8'
 ```
+
+### 2. Install Requirements
+
+> $ pip install -r requirements.txt
+
+### 3. Set Database
+
+```
+$ pg_ctl start -D /usr/local/var/postgres
+$ psql -U [USERNAME]
+# \i sql/create_articles.sql
+# \i sql/create_article_tags.sql
+# \i sql/create_entities.sql
+```
+
+### 4. Run
+
+> $ gunicorn web.server:app
+
+
+
+## Deploy to GAE
+1. make app.yaml in root folder and deploy to GAE
+```
+runtime: python37
+
+entrypoint: gunicorn web.server:app --log-file -
+
+env_variables:
+  DB_NAME: "***"
+  DB_USER: "***"
+  DB_PASSWORD: "***"
+  CONNECTION_NAME: "***"
+  FLASK_APP_KEY: r"***"
+  AUTHENTICATION_ID: "***"
+  AUTHENTICATION_PASS: "***"
+  GOOGLE_APPLICATION_CREDENTIALS: "***"
+
+handlers:
+- url: /.*
+  secure: always
+  redirect_http_response_code: 301
+  script: auto
+```
+
+> $ gcloud app deploy app.yaml 
+
+2. make cron.yaml in root folder and deploy to GAE
+
+```
+cron:
+- description: "weekly crawling job"
+  url: /crawl
+  schedule: every monday 09:00
+```
+
+> $ gcloud app deploy cron.yaml
 
 ## LICENCE
 Reference [LICENCE.txt](LICENSE.txt)

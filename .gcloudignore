@@ -1,7 +1,12 @@
 .gcloudignore
 .gitignore
+.vscode/*
+.vscode/
 **/*.sh
 cloud_sql_proxy
+
+# files for logging
+/log/*
 
 # files for virtualenv
 /env/*
