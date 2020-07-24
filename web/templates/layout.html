@@ -9,12 +9,18 @@
         <script src="{{ url_for('static', filename='datatable-master/js/datatable.jquery.min.js') }}" type="text/javascript"></script>        
     </head>
     <body>
-        <div style="margin: 10px; text-align: right;">
+        <header>
+            <h1><a href="/">RTBSquare 分析ツール</a></h1>
+            <a href="https://github.com/DAConsortium/rtbsquare-keyword-analyze" target="_blank" id="togithub">Githubへ</a>
+            <a href="https://rtbsquare.work/" target="_blank" id="tortb">RTBSquareサイトへ</a>
             {% if current_user.is_authenticated %}
-                <a href="/logout">ログアウト</a>
+                <a href="/logout" id="logout">ログアウト</a>
             {% endif %}
-        </div>
+            <a href="/" id="totop">TOPへ</a>
+            <div style="clear: right;"></div>
+        </header>
         {% block content %}
         {% endblock %}
     </body>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}" type="text/css" />
 </html>

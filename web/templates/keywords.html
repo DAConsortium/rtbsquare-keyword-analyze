@@ -1,16 +1,15 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="container">
-    <header>
-        <div id="back"><a href="/">記事一覧へ</a></div>
+<div class="container" id="main-container">
+    <div class="detail-head">
         <h2>「{{ article['title'] }}」</h2>
-        <p><a href="{{ article['url'] }}">{{ article['url'] }}</a></p>
+        <p><a href="{{ article['url'] }}" target="_blank">{{ article['url'] }}</a></p>
         <p>タグ： 
             {% for tag in article['tags'] %}
                 <span class="tag">{{ tag }}</span>
             {% endfor %}
         </p>
-        <button type="button" class="btn btn-primary article-content">記事本文</button>
+        <button type="button" class="btn btn-primary article-content">記事本文を表示</button>
         <div id="article-content" style="display: none">
             <p>{{ article['content'] }}</p>
         </div>
@@ -21,7 +20,7 @@
                 })
             });
         </script>
-    </header>
+    </div class="detail-head">
     
     <div class="keywords">
         <table id="datatable" class="table table-striped container">
