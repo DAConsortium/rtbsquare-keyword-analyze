@@ -95,16 +95,26 @@ handlers:
 
 > $ gcloud app deploy app.yaml 
 
-2. make cron.yaml in root folder and deploy to GAE
+## Deploy Batch Process to Cloud Functions
+
+1. make cloud functions and pubsub topic
+> $ gcloud functions deploy crawl_function --source ./articleCrawl --runtime python37 --region asia-northeast1 --timeout 540 --trigger-resource crawl-trigger --trigger-event google.pubsub.topic.publish --entry-point crawl --project dac-techdev0
+
+enviroment variables in cloud functions (set at gcp console)
 
 ```
-cron:
-- description: "weekly crawling job"
-  url: /crawl
-  schedule: every monday 09:00
+DB_NAME=***
+DB_USER=***
+DB_PASSWORD=***
+CONNECTION_NAME=***
+GOOGLE_APPLICATION_CREDENTIALS=***
+SCRAPY_SETTINGS_MODULE="settings"
+MAX_PAGE_NUM=5
+SAVE_TERM=180
+FIRST_CRAWL_TERM=30
 ```
 
-> $ gcloud app deploy cron.yaml
+2. make cloud scheduler to kick pubsub
 
 ## LICENCE
 Reference [LICENCE.txt](LICENSE.txt)
