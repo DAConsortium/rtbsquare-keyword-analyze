@@ -1,6 +1,5 @@
-
-header h2{
-    margin: 20px;
+div#main-container {
+    padding-top: 130px;
 }
 
 div.downloads{

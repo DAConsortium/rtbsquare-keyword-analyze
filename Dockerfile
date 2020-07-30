@@ -8,6 +8,6 @@ ARG web_dir=/usr/src/app/web
 WORKDIR ${web_dir}
 ADD web ${web_dir}/
 
-RUN pip install -r requirements.txt
+RUN pip install -r ../requirements.txt
 RUN cd ${project_dir}
 CMD ["gunicorn" "web.server:app"]

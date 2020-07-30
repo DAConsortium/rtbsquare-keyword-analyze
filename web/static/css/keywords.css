@@ -1,3 +1,6 @@
+div#main-container {
+    padding-top: 130px;
+}
 
 div#back{
     padding: 3px;
@@ -6,7 +9,7 @@ div#back{
     border: 2px solid gray;
 }
 
-header h2{
+div.detail-head h2{
     margin: 20px;
 }
 
@@ -19,7 +22,7 @@ div#article-content{
     padding: 10px;
 }
 
-header .tag{
+div.detail-head .tag{
     margin: 10px;
 }
 

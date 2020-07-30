@@ -12,6 +12,6 @@ cloud_sql_proxy
 **/*.sh
 
 main.py
-dac-techdev0-bcaadd06c045.json
+**/dac-techdev0-bcaadd06c045.json
 *.json
 *.yaml

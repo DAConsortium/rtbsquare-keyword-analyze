@@ -1,9 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="container">
-    <header>
-        <h2>記事一覧</h2>
-    </header>
+<div class="container" id="main-container">
     <div class="downloads">
         <p>CSVダウンロードする項目を選択</p>
         <form action="/dump" method="post">
@@ -40,10 +37,10 @@
         <table id="datatable" class="table table-striped container">
             <thead class="thead-dark">
                 <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">タイトル</th>
-                    <th scope="col" style="width:10%">投稿日</th>
-                    <th scope="col">URL</th>
+                    <th scope="col" style="width:10%">#</th>
+                    <th scope="col" style="width:35%">タイトル</th>
+                    <th scope="col" style="width:15%">投稿日</th>
+                    <th scope="col" style="width:20%">URL</th>
                     <th scope="col" style="width: 20%">タグ</th>
                 </tr>
             </thead>
@@ -52,9 +49,9 @@
                 <tr>
                     <th scope="row"><a href="/keywords?article={{ article['url'] }}">詳細</a></th>
                     <td>{{ article['title'] }}</td>
-                    <td style="width:10%">{{ article['date'] }}</td>
-                    <td><a href="{{ article['url'] }}">{{ article['url'] }}</a></td>
-                    <td style="width: 20%">
+                    <td>{{ article['date'] }}</td>
+                    <td><a href="{{ article['url'] }}" target="_blank">{{ article['url'] }}</a></td>
+                    <td>
                         {% for tag in article['tags'] %}
                         <p>{{ tag }}</p>
                         {% endfor %}
